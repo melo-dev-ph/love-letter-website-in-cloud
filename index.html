@@ -11,111 +11,255 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
     </head>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const container = document.getElementById('museumCarousel');
-            const cards = document.querySelectorAll('.memory-card');
-            const modal = document.getElementById('storyModal');
-            const modalTitle = document.getElementById('modalTitle');
-            const modalBody = document.getElementById('modalBody');
-            const closeBtn = document.querySelector('.close-btn');
-            
-            // NEW: Select Envelope Elements
-            const envelope = document.querySelector('.envelope-overlay');
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        // --- 1. SETUP ELEMENTS ---
+        const container = document.getElementById('museumCarousel');
+        const cards = document.querySelectorAll('.memory-card');
+        const modal = document.getElementById('storyModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalBody = document.getElementById('modalBody');
+        const closeBtn = document.querySelector('.close-btn');
+        const envelope = document.querySelector('.envelope-overlay');
 
-            // --- 1. CAROUSEL LOGIC (Swiper-like Native) ---
-            function updateCarousel() {
-                const containerCenter = container.getBoundingClientRect().left + (container.offsetWidth / 2);
+        // NEW: Lock & Timer Elements
+        const glassCase = document.getElementById('glassCase');
+        const scrollContainer = document.getElementById('scrollContainer');
+        const passInput = document.getElementById('passInput');
+        const unlockBtn = document.getElementById('unlockBtn');
+        const errorMsg = document.getElementById('errorMsg');
+        const statusText = document.getElementById('statusText');
 
-                cards.forEach((card, index) => {
-                    const cardRect = card.getBoundingClientRect();
-                    const cardCenter = cardRect.left + (cardRect.width / 2);
-                    const distance = cardCenter - containerCenter;
-                    const absDistance = Math.abs(distance);
-                    
-                    let rotate = distance / 10; 
-                    if (rotate > 45) rotate = 45;
-                    if (rotate < -45) rotate = -45;
+        // --- 2. CAROUSEL LOGIC ---
+        function updateCarousel() {
+            if(!container) return; // Safety check
+            const containerCenter = container.getBoundingClientRect().left + (container.offsetWidth / 2);
 
-                    const zIndex = 100 - Math.floor(absDistance / 10);
-                    card.style.zIndex = zIndex;
+            cards.forEach((card, index) => {
+                const cardRect = card.getBoundingClientRect();
+                const cardCenter = cardRect.left + (cardRect.width / 2);
+                const distance = cardCenter - containerCenter;
+                const absDistance = Math.abs(distance);
+                
+                let rotate = distance / 10; 
+                if (rotate > 45) rotate = 45;
+                if (rotate < -45) rotate = -45;
 
-                    if (absDistance < 100) {
-                        card.style.transform = `scale(1.1) rotateY(0deg)`;
-                        card.style.opacity = "1";
-                        card.style.filter = "blur(0px) grayscale(0%)";
-                        card.classList.add('active');
-                    } else {
-                        card.style.transform = `scale(0.85) rotateY(${rotate}deg)`;
-                        card.style.opacity = "0.6";
-                        card.style.filter = "blur(1px) grayscale(40%)";
-                        card.classList.remove('active');
-                    }
-                });
-            }
+                const zIndex = 100 - Math.floor(absDistance / 10);
+                card.style.zIndex = zIndex;
 
-            // --- 2. CLICK CARD HANDLING ---
-            cards.forEach(card => {
-                card.addEventListener('click', (e) => {
-                    if (card.classList.contains('active')) {
-                        const title = card.querySelector('h2').innerText;
-                        const fullStory = card.querySelector('.desc-pop').innerHTML;
-                        modalTitle.innerText = title;
-                        modalBody.innerHTML = fullStory;
-                        modal.style.display = "block";
-                    } else {
-                        const cardLeft = card.offsetLeft;
-                        const scrollPos = cardLeft - (container.offsetWidth / 2) + (card.offsetWidth / 2);
-                        container.scrollTo({ left: scrollPos, behavior: 'smooth' });
-                    }
-                });
+                if (absDistance < 100) {
+                    card.style.transform = `scale(1.1) rotateY(0deg)`;
+                    card.style.opacity = "1";
+                    card.style.filter = "blur(0px) grayscale(0%)";
+                    card.classList.add('active');
+                } else {
+                    card.style.transform = `scale(0.85) rotateY(${rotate}deg)`;
+                    card.style.opacity = "0.6";
+                    card.style.filter = "blur(1px) grayscale(40%)";
+                    card.classList.remove('active');
+                }
             });
+        }
 
+        // --- 3. CLICK CARD HANDLING ---
+        cards.forEach(card => {
+            card.addEventListener('click', (e) => {
+                if (card.classList.contains('active')) {
+                    const title = card.querySelector('h2').innerText;
+                    const fullStory = card.querySelector('.desc-pop').innerHTML;
+                    modalTitle.innerText = title;
+                    modalBody.innerHTML = fullStory;
+                    modal.style.display = "block";
+                } else {
+                    const cardLeft = card.offsetLeft;
+                    const scrollPos = cardLeft - (container.offsetWidth / 2) + (card.offsetWidth / 2);
+                    container.scrollTo({ left: scrollPos, behavior: 'smooth' });
+                }
+            });
+        });
+
+        // Initialize Carousel
+        if(container) {
             container.addEventListener('scroll', updateCarousel);
             window.addEventListener('resize', updateCarousel);
             updateCarousel();
+        }
 
-            closeBtn.onclick = () => modal.style.display = "none";
-            window.onclick = (event) => {
-                if (event.target == modal) modal.style.display = "none";
-            }
+        // Modal Closing
+        if(closeBtn) closeBtn.onclick = () => modal.style.display = "none";
+        window.onclick = (event) => {
+            if (event.target == modal) modal.style.display = "none";
+        }
 
-            // --- 3. SCROLL OBSERVER (DARK MODE TRIGGER) ---
-            const carouselSection = document.querySelector('.carousel-wrapper');
-            const observerOptions = { root: null, threshold: 0.4 };
+        // --- 4. SCROLL OBSERVER (DARK MODE) ---
+        const carouselSection = document.querySelector('.carousel-wrapper');
+        const observerOptions = { root: null, threshold: 0.4 };
 
-            const scrollObserver = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        document.body.classList.add('dark-mode');
-                    } else {
-                        // Reset everything when scrolling away
-                        document.body.classList.remove('dark-mode');
-                        document.body.classList.remove('letter-open'); // Close letter
-                        envelope.classList.remove('shake-active');   // Stop shake
-                    }
-                });
-            }, observerOptions);
+        const scrollObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    document.body.classList.add('dark-mode');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                    document.body.classList.remove('letter-open'); 
+                    if(envelope) envelope.classList.remove('shake-active'); 
+                }
+            });
+        }, observerOptions);
 
-            scrollObserver.observe(carouselSection);
+        if(carouselSection) scrollObserver.observe(carouselSection);
 
-            // --- 4. ENVELOPE CLICK INTERACTION ---
+        // --- 5. ENVELOPE INTERACTION ---
+        if(envelope) {
             envelope.addEventListener('click', () => {
-                // If already open, do nothing
                 if (document.body.classList.contains('letter-open')) return;
+                
+                // 1. Play Music Immediately on Click (Required for iPhone)
+                const music = document.getElementById('bgMusic');
+                if(music) {
+                    music.volume = 0.5; // Set volume to 50% so it's not too loud
+                    music.play().catch(error => console.log("Music play failed:", error));
+                }
 
-                // 1. Trigger Shake Animation
+                // 2. Start Animation
                 envelope.classList.add('shake-active');
-
-                // 2. Wait 0.5s for shake to finish, then Open
                 setTimeout(() => {
                     document.body.classList.add('letter-open');
                 }, 500);
             });
-        });
-    </script>
+        }
+
+        // --- 6. LOCK & TIMER LOGIC (THIS WAS MISSING) ---
+        const CORRECT_PASS = "melocrim143";
+
+        if(unlockBtn) {
+            unlockBtn.addEventListener('click', handleUnlock);
+        }
+        
+        if(passInput) {
+            passInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') handleUnlock();
+            });
+        }
+
+        function handleUnlock() {
+            if(passInput.value === CORRECT_PASS) {
+                // Success
+                errorMsg.style.opacity = "0";
+                glassCase.classList.add('shattered'); // Fade out lock
+
+                // Reveal Scroll
+                setTimeout(() => {
+                    scrollContainer.classList.add('unrolled');
+                    startScrollTimer();
+                }, 800);
+            } else {
+                // Error
+                errorMsg.style.opacity = "1";
+                passInput.classList.add('shake-active');
+                setTimeout(() => passInput.classList.remove('shake-active'), 500);
+            }
+        }
+
+        function startScrollTimer() {
+            // *** TARGET DATE: Feb 14, 2026 ***
+            const targetDate = new Date("October 24, 2026 00:00:00").getTime();
+
+            const interval = setInterval(() => {
+                const now = new Date().getTime();
+                const distance = targetDate - now;
+
+                if (distance < 0) {
+                    clearInterval(interval);
+                    document.querySelector('.classic-timer').innerHTML = "<h3>The wait is over!</h3>"; 
+                    if(statusText) {
+                         statusText.innerText = "She said Yes!";
+                         statusText.style.color = "#00b894"; // Green for success
+                    }
+                    return;
+                }
+
+                // Time Math
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                // Binary Conversion
+                const binDays = days.toString(2).padStart(9, '0');    
+                const binHours = hours.toString(2).padStart(5, '0');  
+                const binMins = minutes.toString(2).padStart(6, '0'); 
+                const binSecs = seconds.toString(2).padStart(6, '0'); 
+
+                // Update UI
+                if(document.getElementById('days')) document.getElementById('days').innerText = binDays;
+                if(document.getElementById('hours')) document.getElementById('hours').innerText = binHours;
+                if(document.getElementById('minutes')) document.getElementById('minutes').innerText = binMins;
+                if(document.getElementById('seconds')) document.getElementById('seconds').innerText = binSecs;
+
+                // Update Status Text
+                if(statusText) updateMysteryMessage(days, statusText);
+
+            }, 1000);
+        }
+
+        function updateMysteryMessage(days, element) {
+            let msg = "";
+            if (days > 300) msg = "Data compiling... Patience is required.";
+            else if (days > 200) msg = "Establishing secure connection...";
+            else if (days > 100) msg = "Confidence Building up... Decrypting.";
+            else if (days > 50) msg = "Protocol accelerated. Heart rate increasing.";
+            else if (days > 10) msg = "Final preparations. The moment is near.";
+            else msg = "CRITICAL: SYSTEM READY FOR DEPLOYMENT.";
+
+            if (element.innerText !== msg) element.innerText = msg;
+        }
+
+        // --- LEAF GENERATOR ---
+    function createLeaf() {
+        const leaf = document.createElement('div');
+        leaf.classList.add('leaf');
+        
+        // Randomize position
+        leaf.style.left = Math.random() * 100 + 'vw';
+        
+        // Randomize animation duration (speed)
+        const duration = Math.random() * 5 + 5; // Between 5s and 10s
+        leaf.style.animationDuration = duration + 's';
+        
+        // Randomize size slightly
+        const size = Math.random() * 15 + 15; // Between 15px and 30px
+        leaf.style.width = size + 'px';
+        leaf.style.height = size + 'px';
+        
+        // Randomize leaf color (Green to Autumn Gold)
+        // Note: This filter only works because the SVG is set to a base green color
+        const hueRotate = Math.random() * 60; // 0 to 60deg shift
+        leaf.style.filter = `hue-rotate(${hueRotate}deg)`;
+
+        document.body.appendChild(leaf);
+
+        // Remove leaf after it falls to keep DOM clean
+        setTimeout(() => {
+            leaf.remove();
+        }, duration * 1000);
+    }
+
+    // Create a new leaf every 400ms
+    setInterval(createLeaf, 400);
+
+    // ... end of script ...
+
+    });
+</script>
 
     <body>
+        <audio id="bgMusic" loop>
+        <source src="rewrite-the-stars.mp3" type="audio/mpeg">
+            Your browser does not support the audio element.
+        </audio>
+
         <div id="homepageTitle">
             <h1 class="main-header">Real Love Started Here</h1>
             <p class="main-header-desc">
@@ -321,27 +465,93 @@
             </div>
         </div>
 
-        <div class="courtship-timer">
-            <h2 id="timerHeader"> COURTSHIP COUNTDOWN</h2>
-            <h3 id="timerCountdown">Sample</h3>
-            <p id="timerDesc">
-                I melo, will fully dedicate myself in pursuing 
-                <em>Crista Mae Buhion</em>. I will love her until
-                the very day that we die, and I will do my best to make her
-                happy until the very day that the Lord will take us away.
-            </p>
+    <div class="courtship-section-wrapper">
+    
+        <div class="glass-case" id="glassCase">
+            <div class="glass-content">
+                <div class="wax-seal">❤</div>
+                <h2 class="case-title">Restricted Artifact</h2>
+                <p class="case-subtitle">Enter the password to break the seal</p>
+                
+                <div class="input-group">
+                    <input type="password" id="passInput" placeholder="Password" autocomplete="off">
+                    <button id="unlockBtn">Open Case</button>
+                </div>
+                <p id="errorMsg" class="error-msg">Incorrect Password</p>
+            </div>
         </div>
 
-        <div class="credits-section">
-            <h2 id="author">Author: John Carl Mauricio</h2>
-            <h2 id="developer">Developer: John Carl Mauricio</h2>
-            <h2 id="wife">Future Wife: Crista Mae Buhion</h2>
-            <p id="verse">
-                <em>Ruth 1:16</em> But Ruth replied, “Don’t urge me 
-                to leave you or to turn back from you. Where you 
-                go I will go, and where you stay I will stay. 
-                Your people will be my people and your God my God.
-            </p>
+        <div class="scroll-container" id="scrollContainer">
+            <div class="scroll-rod top"></div>
+            
+            <div class="parchment-paper">
+                <h2 class="scroll-header">The Vow of Time</h2>
+                <p class="wish-annotation">"Sana Payagan"</p>
+                <p class="scroll-verse">
+                    "For every second that passes is a second closer to forever."
+                </p>
+
+                <div class="classic-timer">
+                    <div class="time-box">
+                        <span id="days">00</span>
+                        <span class="label">Days</span>
+                    </div>
+                    <div class="separator">:</div>
+                    <div class="time-box">
+                        <span id="hours">00</span>
+                        <span class="label">Hours</span>
+                    </div>
+                    <div class="separator">:</div>
+                    <div class="time-box">
+                        <span id="minutes">00</span>
+                        <span class="label">Mins</span>
+                    </div>
+                    <div class="separator">:</div>
+                    <div class="time-box">
+                        <span id="seconds">00</span>
+                        <span class="label">Secs</span>
+                    </div>
+                </div>
+
+                <p class="scroll-footer">
+                    Target: <strong>Crista Mae Buhion</strong><br>
+                    Status: <span class="ink-status" id="statusText">Waiting for that Yes...</span>
+                </p>
+            </div>
+
+            <div class="scroll-rod bottom"></div>
         </div>
+
+    </div>
+
+
+    <div class="credits-section">
+        <div class="museum-divider">✦</div>
+        
+        <div class="credits-grid">
+            <div class="credit-item">
+                <span class="credit-role">Curated & Developed by</span>
+                <h3 class="credit-name">John Carl Mauricio</h3>
+            </div>
+            
+            <div class="credit-item">
+                <span class="credit-role">Dedicated to</span>
+                <h3 class="credit-name highlight">Crista Mae Buhion</h3>
+            </div>
+        </div>
+
+        <div class="verse-container">
+            <p class="verse-text">
+                “But Ruth replied, ‘Don’t urge me to leave you or to turn back from you. 
+                Where you go I will go, and where you stay I will stay. 
+                Your people will be my people and your God my God.’”
+            </p>
+            <span class="verse-ref">— Ruth 1:16</span>
+        </div>
+
+        <div class="copyright">
+            &copy; 2026 MeloCrim Museum. All Rights Reserved.
+        </div>
+    </div>
     </body>
 </html>

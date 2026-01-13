@@ -1,15 +1,19 @@
+/* style.css - MOBILE OPTIMIZED */
+
 body {
     background-color: rgb(253, 251, 238);
     margin: 0;
-    /* We keep the transition for smoothness, but we won't drastically change the body color anymore */
     transition: background-color 1s ease;
+    /* Prevent horizontal scroll on mobile */
+    overflow-x: hidden; 
+    width: 100%;
 }
 
 p, .desc, .desc-pop, .story-text, #timerDesc, #verse {
     font-family: 'Lora', serif;
     line-height: 1.8;
     font-size: 1.1rem;
-    color: #333; /* Dark grey text is easier to read than pure black */
+    color: #333;
 }
 
 h1, h2, h3, .year, .main-header, .main-header-desc {
@@ -36,7 +40,7 @@ h1, h2, h3, .year, .main-header, .main-header-desc {
     line-height: 0.9;
 }
 
-/* --- CAROUSEL WRAPPER (THE CONTAINER OF THE BOX) --- */
+/* --- CAROUSEL WRAPPER --- */
 .carousel-wrapper {
     perspective: 1000px;
     position: relative;
@@ -44,11 +48,8 @@ h1, h2, h3, .year, .main-header, .main-header-desc {
     max-width: 1100px;
     height: 600px;
     margin: 50px auto;
-    
-    /* Clipping the content to fit the rounded glass */
     overflow: hidden; 
     border-radius: 40px; 
-    
     display: flex;
     justify-content: center;
     align-items: center;
@@ -67,9 +68,7 @@ h1, h2, h3, .year, .main-header, .main-header-desc {
     height: 100%;
 }
 
-.container::-webkit-scrollbar {
-    display: none;
-}
+.container::-webkit-scrollbar { display: none; }
 
 /* --- MEMORY CARD STYLES --- */
 .memory-card {
@@ -78,21 +77,18 @@ h1, h2, h3, .year, .main-header, .main-header-desc {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    margin: 0 -35px; /* Overlap */
-    
+    margin: 0 -35px;
     scroll-snap-align: center;
     cursor: pointer;
     background: white;
     border-radius: 15px;
     padding: 20px;
     box-sizing: border-box;
-    
-    /* Default State */
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.6s ease, filter 0.6s;
     opacity: 0.5;
     transform: scale(0.8) rotateY(20deg);
-    filter: blur(2px) grayscale(40%); /* Added grayscale for inactive cards */
+    filter: blur(2px) grayscale(40%);
     z-index: 1;
 }
 
@@ -101,7 +97,6 @@ h1, h2, h3, .year, .main-header, .main-header-desc {
     transform: scale(1.1) rotateY(0deg) translateZ(20px);
     filter: blur(0px) grayscale(0%);
     z-index: 100;
-    /* Glowing shadow for the active card */
     box-shadow: 0 20px 60px rgba(0,0,0,0.5); 
 }
 
@@ -137,69 +132,37 @@ h1, h2, h3, .year, .main-header, .main-header-desc {
 .carousel-wrapper::before {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    
-    /* 1. DARK SMOKED GLASS (Default) */
-    background: linear-gradient(
-        135deg, 
-        rgba(0, 0, 0, 0.95), 
-        rgba(25, 25, 25, 0.85)
-    );
-    
-    /* 2. THE BLUR */
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.95), rgba(25, 25, 25, 0.85));
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    
-    /* 3. DARK GLASS BORDER */
     border: 1px solid rgba(255, 255, 255, 0.15);
-    border-top: 1px solid rgba(255, 255, 255, 0.3); /* Top shine */
-    
-    /* Deep Shadow */
+    border-top: 1px solid rgba(255, 255, 255, 0.3); 
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
-    
     z-index: -1; 
     transition: all 1.2s ease;
 }
 
-/* --- THE MAGIC TRANSFORMATION (Scroll Triggered) --- */
+body.dark-mode { background-color: rgb(253, 251, 238); }
 
-/* 1. The Body stays Light (No change here) */
-body.dark-mode {
-    background-color: rgb(253, 251, 238); 
-}
-
-/* 2. BUT... The Box turns into a "Cinema Display" */
-
-
-/* 3. The shadow underneath gets darker */
 .carousel-wrapper::after {
     content: '';
     position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 60%;
-    height: 20px;
+    bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 60%; height: 20px;
     background: radial-gradient(ellipse at center, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 70%);
     z-index: -1;
     transition: all 1s ease;
 }
-
 
 /* --- MODAL --- */
 .modal {
     display: none;
     position: fixed;
     z-index: 200;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0,0,0,0.85); /* Darker backdrop */
-    backdrop-filter: blur(8px); /* Strong blur behind modal */
+    left: 0; top: 0; width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.85);
+    backdrop-filter: blur(8px);
 }
 
 .modal-content {
@@ -213,6 +176,8 @@ body.dark-mode {
     font-family: 'Lora', serif;
     animation: fadeIn 0.4s ease-out;
     box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+    max-height: 80vh; /* Ensure modal fits on screen */
+    overflow-y: auto; /* Scroll if text is long */
 }
 
 .close-btn {
@@ -224,24 +189,19 @@ body.dark-mode {
     transition: color 0.3s;
 }
 
-.close-btn:hover {
-    color: #000;
-}
+.close-btn:hover { color: #000; }
 
 @keyframes fadeIn {
     from { opacity: 0; transform: scale(0.95); }
     to { opacity: 1; transform: scale(1); }
 }
 
-/* Footer Sections */
 .courtship-timer, .credits-section {
     text-align: center;
     padding: 60px 20px;
 }
 
 /* --- ENVELOPE ANIMATION STYLES --- */
-
-/* Shake Keyframes (Vibration effect) */
 @keyframes shake {
   0% { transform: translate(1px, 1px) rotate(0deg); }
   10% { transform: translate(-1px, -2px) rotate(-1deg); }
@@ -256,25 +216,19 @@ body.dark-mode {
   100% { transform: translate(1px, -2px) rotate(-1deg); }
 }
 
-/* 1. The Container for the Envelope */
 .envelope-overlay {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: 0; left: 0; width: 100%; height: 100%;
     z-index: 500;
     display: flex;
     justify-content: center;
     align-items: center;
     transition: all 2s ease;
-    
-    /* INTERACTIVITY */
-    cursor: pointer; /* Shows hand cursor */
-    pointer-events: auto; /* Ensures it catches the click */
+    cursor: pointer;
+    pointer-events: auto;
+    overflow: hidden; /* Important for mobile so triangles don't spill */
 }
 
-/* Apply Shake when JS adds the class */
 .envelope-overlay.shake-active {
     animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
 }
@@ -283,15 +237,11 @@ body.dark-mode {
 .envelope-body {
     position: absolute;
     bottom: 0;
-    width: 0;
-    height: 0;
+    width: 0; height: 0;
     border-left: 550px solid transparent;
     border-right: 550px solid transparent;
-    
-    /* CHANGED: Dark Charcoal Paper */
-    border-bottom: 350px solid #2b2b2b; 
-    
-    filter: drop-shadow(0 -5px 10px rgba(0,0,0,0.3)); /* Darker shadow */
+    border-bottom: 350px solid #2b2b2b;
+    filter: drop-shadow(0 -5px 10px rgba(0,0,0,0.3));
     z-index: 502;
     transition: transform 2s ease, opacity 2s ease;
 }
@@ -300,14 +250,10 @@ body.dark-mode {
 .envelope-flap {
     position: absolute;
     top: 0;
-    width: 0;
-    height: 0;
+    width: 0; height: 0;
     border-left: 550px solid transparent;
     border-right: 550px solid transparent;
-    
-    /* CHANGED: Lighter Charcoal for contrast */
-    border-top: 320px solid #3d3d3d; 
-    
+    border-top: 320px solid #3d3d3d;
     transform-origin: top;
     z-index: 503;
     filter: drop-shadow(0 5px 5px rgba(0,0,0,0.3));
@@ -332,49 +278,124 @@ body.dark-mode {
     100% { transform: scale(1); }
 }
 
-/* --- THE OPENING ANIMATION (Triggered by CLICK) --- */
-/* Note: We now check for .letter-open, not just dark-mode */
-
-/* 1. Open the Flap */
+/* --- THE OPENING ANIMATION --- */
 body.letter-open .envelope-flap {
     transform: rotateX(180deg);
     opacity: 0;
     transition: transform 2.5s ease, opacity 1s ease 1.5s;
 }
 
-/* 2. Slide the Body Down */
 body.letter-open .envelope-body {
     transform: translateY(100%);
     opacity: 0;
     transition: transform 2.5s ease 0.5s, opacity 1s ease 1.5s;
 }
 
-/* 3. Break the Heart */
 body.letter-open .heart-seal {
     transform: scale(0) rotate(360deg);
     opacity: 0;
     transition: all 1.5s ease;
 }
 
-/* 4. Hide the overlay container so we can touch cards */
 body.letter-open .envelope-overlay {
     opacity: 0;
-    pointer-events: none; /* Allows clicking through to cards */
+    pointer-events: none; 
     transition: opacity 1s ease 2s; 
 }
 
-/* --- ADJUST THE CAROUSEL VISIBILITY --- */
-
-/* Initial State: Hidden */
+/* --- CAROUSEL VISIBILITY --- */
 .container {
     opacity: 0;
     transform: scale(0.9);
     transition: all 2s ease 1s; 
 }
 
-/* Revealed State */
 body.letter-open .container {
     opacity: 1;
     transform: scale(1);
     transition: all 2.5s ease 1s;
+}
+
+/* --- LEAF ANIMATION --- */
+.leaf {
+    position: fixed;
+    top: -50px;
+    z-index: 9999;
+    width: 25px; height: 25px;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%232d6a4f"><path d="M17,8C8,10,5.9,16.17,3.82,21.34L5.71,22l1-2.3A4.49,4.49,0,0,0,8,20C19,20,22,3,22,3,21,5,14,5.25,9,6.25S2,11.5,2,13.5a6.22,6.22,0,0,0,1.75,3.75C7,8,17,8,17,8Z"/></svg>');
+    background-size: contain;
+    background-repeat: no-repeat;
+    opacity: 0.6;
+    pointer-events: none;
+    animation: fall linear infinite;
+}
+
+@keyframes fall {
+    0% { transform: translateY(0) rotate(0deg) translateX(0); opacity: 0; }
+    10% { opacity: 0.8; }
+    100% { transform: translateY(110vh) rotate(360deg) translateX(50px); opacity: 0; }
+}
+
+/* =========================================
+   MOBILE RESPONSIVENESS (iPhone 11 & Others)
+========================================= */
+@media (max-width: 768px) {
+    /* 1. Header Fixes */
+    #homepageTitle {
+        padding: 40px 20px;
+        margin: 40px 0;
+    }
+    .main-header {
+        font-size: 3rem; /* Much smaller font */
+        margin-top: 0;
+    }
+    .main-header-desc {
+        font-size: 1rem;
+        padding: 0 10px;
+    }
+
+    /* 2. Carousel Fixes */
+    .carousel-wrapper {
+        height: 500px;
+        width: 100%;
+        border-radius: 0; /* Full width looks better on mobile */
+        margin: 20px 0;
+    }
+    
+    .container {
+        /* Adjust snapping padding for mobile */
+        padding: 0 calc(50% - 130px); 
+    }
+
+    .memory-card {
+        flex: 0 0 260px; /* Smaller cards */
+        height: 420px;
+        margin: 0 -20px;
+    }
+
+    /* 3. Envelope Fixes (Crucial for Mobile) */
+    /* We switch from px to vw (viewport width) so it fits any phone */
+    .envelope-body {
+        border-left-width: 50vw;
+        border-right-width: 50vw;
+        border-bottom-width: 40vh;
+    }
+    
+    .envelope-flap {
+        border-left-width: 50vw;
+        border-right-width: 50vw;
+        border-top-width: 35vh;
+    }
+    
+    .heart-seal {
+        top: 30vh;
+        font-size: 40px;
+    }
+    
+    /* 4. Modal Fix */
+    .modal-content {
+        margin: 20% auto;
+        width: 85%;
+        padding: 25px;
+    }
 }
