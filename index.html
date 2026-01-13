@@ -2,13 +2,123 @@
 <html>
     <head>
         <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>MeloCrim Museum</title>
+        <link rel="stylesheet" href="style.css">
+        <link rel="stylesheet" href="countdown-style.css">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
     </head>
 
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const container = document.getElementById('museumCarousel');
+            const cards = document.querySelectorAll('.memory-card');
+            const modal = document.getElementById('storyModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody');
+            const closeBtn = document.querySelector('.close-btn');
+            
+            // NEW: Select Envelope Elements
+            const envelope = document.querySelector('.envelope-overlay');
+
+            // --- 1. CAROUSEL LOGIC (Swiper-like Native) ---
+            function updateCarousel() {
+                const containerCenter = container.getBoundingClientRect().left + (container.offsetWidth / 2);
+
+                cards.forEach((card, index) => {
+                    const cardRect = card.getBoundingClientRect();
+                    const cardCenter = cardRect.left + (cardRect.width / 2);
+                    const distance = cardCenter - containerCenter;
+                    const absDistance = Math.abs(distance);
+                    
+                    let rotate = distance / 10; 
+                    if (rotate > 45) rotate = 45;
+                    if (rotate < -45) rotate = -45;
+
+                    const zIndex = 100 - Math.floor(absDistance / 10);
+                    card.style.zIndex = zIndex;
+
+                    if (absDistance < 100) {
+                        card.style.transform = `scale(1.1) rotateY(0deg)`;
+                        card.style.opacity = "1";
+                        card.style.filter = "blur(0px) grayscale(0%)";
+                        card.classList.add('active');
+                    } else {
+                        card.style.transform = `scale(0.85) rotateY(${rotate}deg)`;
+                        card.style.opacity = "0.6";
+                        card.style.filter = "blur(1px) grayscale(40%)";
+                        card.classList.remove('active');
+                    }
+                });
+            }
+
+            // --- 2. CLICK CARD HANDLING ---
+            cards.forEach(card => {
+                card.addEventListener('click', (e) => {
+                    if (card.classList.contains('active')) {
+                        const title = card.querySelector('h2').innerText;
+                        const fullStory = card.querySelector('.desc-pop').innerHTML;
+                        modalTitle.innerText = title;
+                        modalBody.innerHTML = fullStory;
+                        modal.style.display = "block";
+                    } else {
+                        const cardLeft = card.offsetLeft;
+                        const scrollPos = cardLeft - (container.offsetWidth / 2) + (card.offsetWidth / 2);
+                        container.scrollTo({ left: scrollPos, behavior: 'smooth' });
+                    }
+                });
+            });
+
+            container.addEventListener('scroll', updateCarousel);
+            window.addEventListener('resize', updateCarousel);
+            updateCarousel();
+
+            closeBtn.onclick = () => modal.style.display = "none";
+            window.onclick = (event) => {
+                if (event.target == modal) modal.style.display = "none";
+            }
+
+            // --- 3. SCROLL OBSERVER (DARK MODE TRIGGER) ---
+            const carouselSection = document.querySelector('.carousel-wrapper');
+            const observerOptions = { root: null, threshold: 0.4 };
+
+            const scrollObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        document.body.classList.add('dark-mode');
+                    } else {
+                        // Reset everything when scrolling away
+                        document.body.classList.remove('dark-mode');
+                        document.body.classList.remove('letter-open'); // Close letter
+                        envelope.classList.remove('shake-active');   // Stop shake
+                    }
+                });
+            }, observerOptions);
+
+            scrollObserver.observe(carouselSection);
+
+            // --- 4. ENVELOPE CLICK INTERACTION ---
+            envelope.addEventListener('click', () => {
+                // If already open, do nothing
+                if (document.body.classList.contains('letter-open')) return;
+
+                // 1. Trigger Shake Animation
+                envelope.classList.add('shake-active');
+
+                // 2. Wait 0.5s for shake to finish, then Open
+                setTimeout(() => {
+                    document.body.classList.add('letter-open');
+                }, 500);
+            });
+        });
+    </script>
+
     <body>
-        <div id="homepage-title">
+        <div id="homepageTitle">
             <h1 class="main-header">Real Love Started Here</h1>
-            <p class="main-header desc">
+            <p class="main-header-desc">
                 This website exhibits the growing love and history of
                 melocrim from the first year they knew each other up
                 until the present (2026). Enjoy exploring the <em>MeloCrim</em>
@@ -16,41 +126,205 @@
             </p>
         </div>
 
-        <div class="container">
-            <div class="container 2019">
-                <h2 class="year">2019 - Crush Era</h2>
-                <img src="https://scontent.fmnl17-2.fna.fbcdn.net/v/t1.6435-9/162046303_454508922535457_2220439969762504579_n.jpg?_nc_cat=111&ccb=1-7&_nc_sid=f727a1&_nc_eui2=AeFRwHjxXu55ltdcXAQ8bnoZR7Pb2C33NztHs9vYLfc3OwzAlgOe64W29mAgiN1OggCrhF3G1Yr4QzZeCFIDkJNj&_nc_ohc=2mr4zflgrjkQ7kNvwEWw5Kz&_nc_oc=AdlJsWaL-P0wu-hKfStt5iVx7LoSCBKHUUHMBfhvIyq5Gz_NO0Xud0-991i52YGv-XY&_nc_zt=23&_nc_ht=scontent.fmnl17-2.fna&_nc_gid=xkot-KlZYIl7VEtRG-2-0Q&oh=00_AfpTZXswYZos3ATeU5PXqQLJpJWBVl4CY8eKItibo6YDlQ&oe=698D57D8">
-                <p class="container desc"> This is the start of the story</p>
-                <p class="container desc-pop">
-                    This is the very first photo of us together. Let me just
-                    share a little bit of my experience of what happened during this day.
-                    I really want to make a move on her though I get very shy, 
-                    I really do get very shy at that time but my friends encouraged me
-                    and I took the initiative to have a photo with her, after having a photo
-                    with her it literally made me proud and happy knowing that I got
-                    my very first photo of my crush.
-                </p>
+        <div class="carousel-wrapper">
+            <div class="envelope-overlay">
+                <div class="envelope-body"></div>
+                <div class="envelope-flap"></div>
+                <div class="heart-seal">❤</div>
             </div>
 
-            <div class="container 2020">
-                <h2 class="year">2020 - Pandemic Era</h2>
-                <img src="https://scontent.fmnl17-1.fna.fbcdn.net/v/t1.6435-9/162437874_454512052535144_6923415019819689064_n.jpg?_nc_cat=100&ccb=1-7&_nc_sid=f727a1&_nc_eui2=AeE0tkJYxIgwAD9uSCVMENCfVOP61wJL7R1U4_rXAkvtHQqL3SspjdUm-EzTMp5bqTNKvQpx_0U5IdrUBykuhbhT&_nc_ohc=nbjm4rlpxqIQ7kNvwG5AkDp&_nc_oc=AdlPH4qE8EGaNKiy_-zLJR_NhyLXZZu5zKLp_AAmFPBmnaOxwdlzpCTVMCxiUld2J5Y&_nc_zt=23&_nc_ht=scontent.fmnl17-1.fna&_nc_gid=Jfxwx0hPMSgk3fLfrL_MLw&oh=00_Afq2cnvzEu7_XRDq9sxB6WOhFXaUXUi5-7oLOO4WdpyGNw&oe=698D5587">
-                <p class="container desc">
-                    This is the pandemic era, this is where we are stuck 
-                    in our houses and we basically do online classes only though
-                    even though we have that distance, we still got the time to bond with each other
-                    and play with each other via <em> Call of Duty Mobile</em>. Everytime we play,
-                    everytime we spoke in our cameras are the moment that I felt very happy.
-                    Being able to have our interest sync at that time made me the happiest
-                    person ever lived and I thank her so much for giving me that happiness.
-                </p>
+            <div class="container" id="museumCarousel">
+                <div class="memory-card year-2019">
+                    <h2 class="year">2019 - Crush Era</h2>
+                    <img src="./images/2019-photo.jpg">
+                    <p class="desc"> This is the start of the story</p>
+
+                    <div class="desc-pop" style="display:none;">
+                        <p>
+                        This is the very first photo of us together. Let me just
+                        share a little bit of my experience of what happened during this day.
+                        I really want to make a move on 
+                        her though I get very shy. 
+                        </p>
+
+                        <p>
+                        I really do get very shy at that time but my friends encouraged me
+                        and I took the initiative to have a photo with her, after having a photo
+                        with her it literally made me proud and happy knowing that I got
+                        my very first photo of my crush.
+                        </p>
+                    </div>
+
+                    <p class="click-instruction">(Click to read the full story)</p>
+                </div>
+
+                <div class="memory-card year-2020">
+                    <h2 class="year">2020 - Pandemic Era</h2>
+                    <img src="./images/2020-photo.jpg">
+                    <p class="desc"> This is the <em>Call of Duty</em> era</p>
+
+                    <div class="desc-pop" style="display:none;">
+                        <p>
+                        This is the pandemic era, this is where we are stuck 
+                        in our houses and we basically do online classes only though
+                        even though we have that distance, we still got the time to bond with each other
+                        and play with each other via <em> Call of Duty Mobile</em>. 
+                        </p>
+                        <p>
+                        Everytime we play,
+                        everytime we spoke in our cameras are the moment that I felt very happy.
+                        Being able to have our interest sync at that time made me the happiest
+                        person ever lived and I thank her so much for giving me that happiness.
+                        </p>
+                    </div>
+
+                    <p class="click-instruction">(Click to read the full story)</p>
+                    
+                </div>
+
+                <div class="memory-card year-2021">
+                    <h2 class="year">2021 - Ghost Era</h2>
+                    <img src="./images/2021-photo.jpg">
+                    <p class="desc"> This is the <em>Ghost</em> era</p>
+
+                    <div class="desc-pop" style="display:none;">
+                        <p>
+                        During this pandemic era - up until it the re-implementation of face-to-face 
+                        classes is the time that I haven't been able to talk to my future wife. I felt
+                        drained, I felt empty, because I didn't just lost her at that time but I also
+                        fell away from God and my time consist of Axie Infinity, Games, and Schools.
+                        This is the most empty era that I have ever experienced.
+                        </p>
+                        <p>
+                        Everytime I play, I feel empty. Everytime I do stuffs, I really do feel empty.
+                        Not talking to her at this era hurted my heart a lot. Heartaches after heartaches and it is so 
+                        painful.
+                        </p>
+                    </div>
+
+                    <p class="click-instruction">(Click to read the full story)</p>
+                </div>
+
+                <div class="memory-card year-2022">
+                    <h2 class="year">2022 - Missing her Era</h2>
+                    <img src="./images/2022-photo.jpg">
+                    <p class="desc"> This is the <em>Restoration</em> era</p>
+
+                    <div class="desc-pop" style="display:none;">
+                        <p>
+                        Pandemic is slowly dissappearing by this time. By this time, I already went to my school 
+                        face to face and you know what? everytime I see her walking outside our room, evertime I see
+                        her face, everytime I see her with someone else, and everytime I saw her having photo with someone.
+                        It literally hurted me a lot. To the point that I just saw her and I find myself having a tear 
+                        falling from my eye.
+                        </p>
+                        <p>
+                        Eventually, one of my friend pushed me and encouraged me and it helped me a lot. By this time,
+                        I also decided to return and surrender my life to the Lord again and he restored me, and my communication 
+                        to my future wife. So the ending, we graduated together, and we sought school for our senior high era.
+                        I'm so happy.
+                        </p>
+                    </div>
+
+                    <p class="click-instruction">(Click to read the full story)</p>
+                </div>
+
+                <div class="memory-card year-2023">
+                    <h2 class="year">2023 - Getting to Know Each Other Era</h2>
+                    <img src="./images/2023-photo.jpg">
+                    <p class="desc"> This is the <em>Getting to know each other</em> era</p>
+
+                    <div class="desc-pop" style="display:none;">
+                        <p>
+                        So we are grade 11 by this time. This is the time that I am excited to be with her, to know her,
+                        to seek more of her, and to get closer to her. I was a little bit - actually no, I am so shy by this time. 
+                        I find it hard to you know, kind of approach her but eventually we got closer and I got to know more of her side.
+                        </p>
+                        <p>
+                        This photo is very special, because it is our first date in Valenzuela City Museum. I just feel awestrucked
+                        by her perfect beauty. I really like her a lot.
+                        </p>
+                    </div>
+
+                    <p class="click-instruction">(Click to read the full story)</p>
+                </div>
+
+                <div class="memory-card year-2024">
+                    <h2 class="year">2024 - Moving Up 2.0 Era</h2>
+                    <img src="./images/2024-photo.jpg">
+                    <p class="desc"> This is the <em>Knowing more of each other</em> era</p>
+
+                    <div class="desc-pop" style="display:none;">
+                        <p>
+                        So we are grade 12 by this time and the photo shows of us graduating and moving up to college!!. 
+                        This Senior High School journey of us is not easy. Temptations after temptations came, we did things that 
+                        we shouldn't have done yet, and we are heavily guilty and convicted by the Lord at this time but eventually 
+                        God restored out purity, our holiness, and our restoration to him.
+                        </p>
+                        <p>
+                        I really cherished every moment, everyday, and everytime that I had with her during this Senior High School era.
+                        I would not forget our laughters, our kulitan, our tampohan, everytime we walk in our Cornelia Street. Never in my life
+                        I will forget it. I don't just like her, but I love her sincerely and genuinely by this time.
+                        </p>
+                    </div>
+
+                    <p class="click-instruction">(Click to read the full story)</p>
+                </div>
+
+                <div class="memory-card year-2025">
+                    <h2 class="year">2025 - Freshman Era</h2>
+                    <img src="./images/2025-photo.jpg">
+                    <p class="desc"> This is the <em>Freshman</em> era</p>
+
+                    <div class="desc-pop" style="display:none;">
+                        <p>
+                        So we are in our 1st year college probably in our 2nd sem by this time. This is the time where 
+                        we adjusted, we have new friends, we have new hobbies and habits but even still I am so happy 
+                        because despite the adjustment and busyness of this time. We still had moments that no one can steal from us.
+                        </p>
+                        <p>
+                        So in late 2025, we are now in our 2nd year college. I knew more of her, I love her smell, her eyes, her cheecks
+                        her mouth, her breath, her armipit's smell, her skin's smell, everything. I really love her, and I promise to my self 
+                        that I will marry her.
+                        </p>
+                    </div>
+
+                    <p class="click-instruction">(Click to read the full story)</p>
+                </div>
+
+                <div class="memory-card year-2026">
+                    <h2 class="year">2026 - ??? Era</h2>
+                    <img src="./images/2026-photo.jpg">
+                    <p class="desc"> This is the <em>Expecting More</em> era</p>
+
+                    <div class="desc-pop" style="display:none;">
+                        <p>
+                        As of now, we are still expecting more but as you can see the photo here only had her face.
+                        </p>
+                        <p>
+                        This will be the year of my commitment, I will commit to her, and I will marry her. Who knows what 
+                        will happen this year! I THANK YOU GOD!
+                        </p>
+                    </div>
+
+                    <p class="click-instruction">(Click to read the full story)</p>
+                </div>
+
+            </div>
+        </div>
+
+        <div id="storyModal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn">&times;</span>
+                <h2 id="modalTitle"></h2>
+                <div id="modalBody"></div>
             </div>
         </div>
 
         <div class="courtship-timer">
-            <h2 id="timer-header"> COURTSHIP COUNTDOWN</h2>
-            <h3 id="timer=countdown">Sample</h3>
-            <p id="timer-desc">
+            <h2 id="timerHeader"> COURTSHIP COUNTDOWN</h2>
+            <h3 id="timerCountdown">Sample</h3>
+            <p id="timerDesc">
                 I melo, will fully dedicate myself in pursuing 
                 <em>Crista Mae Buhion</em>. I will love her until
                 the very day that we die, and I will do my best to make her
